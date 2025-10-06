@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simple Information Form</title>
+  <!-- شعار في تبويب الصفحة -->
+  <link rel="icon" type="image/png" href="Auto Confirm Logo mini.png" />
+  <style>
+    :root {
+      --bg: #f7f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --ring: rgba(37, 99, 235, .35);
+      --success: #059669;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans Arabic", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      font-size: clamp(14px, 1.1vw + 0.6rem, 18px);
+      line-height: 1.6;
+      background: var(--bg); color: var(--text);
+      display: grid; min-height: 100svh; place-items: center; padding: 2vh 0;
+    }
+    .wrap { width: min(760px, 94vw); }
+    .card {
+      background: var(--card); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.06);
+      overflow: hidden; padding: clamp(16px, 2.4vw, 26px); border: 1px solid #eee;
+    }
+    .header { text-align: center; margin-bottom: clamp(12px, 2vw, 20px); position: relative; }
+    .title { margin: 10px 0 4px; font-size: clamp(1.1rem, 1.6vw + .6rem, 1.7rem); font-weight: 800; }
+
+    .lang-switcher {
+      position: absolute; top: 10px; left: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .lang-switcher select {
+      padding: 6px 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 0.9rem; cursor: pointer;
+    }
+
+    .image-holder { display: grid; place-items: center; margin: clamp(12px, 2vw, 20px) auto 8px; }
+    .image-frame { border: none; background: transparent; width: auto; display: grid; place-items: center; }
+    .image-frame img { width: clamp(120px, 22vw, 220px); height: auto; object-fit: contain; display: block; }
+
+    form { display: grid; gap: clamp(10px, 1.6vw, 16px); margin-top: 10px; }
+    .field { display: grid; gap: 6px; }
+    label { font-weight: 700; font-size: .95em; }
+    input[type="text"], input[type="tel"], textarea {
+      width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid #e5e7eb; background: #fff; color: inherit;
+      outline: none; transition: box-shadow .15s, border-color .15s; font-size: 16px;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--ring); }
+
+    .actions { display: flex; justify-content: center; margin-top: 6px; }
+    button { padding: 14px 24px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; font-weight: 700; font-size: 16px; }
+    .btn-primary { background: var(--primary); color: #fff; width: 100%; }
+
+    .alert { display: none; padding: 10px 14px; border-radius: 12px; margin-top: 10px; font-weight: 600; }
+    .alert.show { display: block; }
+    .alert.success { background: #ecfdf5; color: var(--success); border: 1px solid #a7f3d0; }
+    .alert.error { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+
+    @media (min-width: 640px) {
+      .btn-primary { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="form" aria-labelledby="formTitle">
+      <div class="header">
+        <div class="lang-switcher">
+          <img src="Change Language.png" width="28" height="28" alt="Language Icon">
+          <select id="languageSelect" title="Change Language">
+            <option value="ar">العربية</option>
+            <option value="en" selected>English</option>
+            <option value="fr">Français</option>
+          </select>
+        </div>
+
+        <div class="image-holder">
+          <div class="image-frame" aria-live="polite">
+            <img id="preview" src="Auto Confirm Logo.png" alt="Auto Confirm Logo" />
+          </div>
+        </div>
+        <h1 id="formTitle" class="title" data-ar="نموذج معلومات بسيط" data-en="Simple Information Form" data-fr="Formulaire d'information simple">Simple Information Form</h1>
+      </div>
+
+      <form id="contactForm" novalidate>
+        <div class="field">
+          <label for="fullName" data-ar="الاسم واللقب" data-en="Full Name" data-fr="Nom et prénom">Full Name</label>
+          <input id="fullName" name="fullName" type="text" placeholder="Enter your full name" required aria-required="true" />
+        </div>
+
+        <div class="field">
+          <label for="phone" data-ar="رقم الهاتف" data-en="Phone Number" data-fr="Numéro de téléphone">Phone Number</label>
+          <input id="phone" name="phone" type="tel" inputmode="tel" placeholder="e.g., 0555 12 34 56" required aria-required="true"
+                 pattern="^[\+\d\s\-()]{6,}$" title="Please enter a valid phone number (+ - ( ) and digits allowed)" />
+        </div>
+
+        <div class="field">
+          <label for="note" data-ar="أترك ملاحظة" data-en="Leave a Note" data-fr="Laissez une remarque">Leave a Note</label>
+          <textarea id="note" name="note" placeholder="Write your note here..."></textarea>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" type="submit" class="btn-primary" data-ar="إرسال" data-en="Submit" data-fr="Envoyer">Submit</button>
+        </div>
+
+        <div id="alertBox" class="alert" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Webhook URL for n8n
+    const WEBHOOK_URL = 'https://n8n.srv960138.hstgr.cloud/webhook/1051858a-bae6-4ef3-9aba-d1ba0ebdf1f7';
+
+    const form = document.getElementById('contactForm');
+    const alertBox = document.getElementById('alertBox');
+    const submitBtn = document.getElementById('submitBtn');
+
+    function showAlert(type, message) {
+      alertBox.className = 'alert show ' + (type === 'success' ? 'success' : 'error');
+      alertBox.textContent = message;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        showAlert('error', 'Please make sure to fill all required fields correctly.');
+        return;
+      }
+      e.preventDefault();
+
+      const payload = {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        note: document.getElementById('note').value.trim(),
+        submittedAt: new Date().toISOString(),
+        source: 'autoconfirm-web-form'
+      };
+
+      submitBtn.disabled = true;
+      const originalText = submitBtn.textContent;
+      submitBtn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          mode: 'cors',
+          keepalive: true
+        });
+
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+
+        showAlert('success', 'Form submitted successfully!');
+        form.reset();
+      } catch (err) {
+        console.error(err);
+        showAlert('error', 'Submission failed. Please check your connection or webhook URL.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalText;
+      }
+    });
+
+    // Language switcher functionality
+    const langSelect = document.getElementById('languageSelect');
+    langSelect.addEventListener('change', () => {
+      const lang = langSelect.value;
+      document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+      document.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    });
+
+    // Set English as default on load
+    window.addEventListener('DOMContentLoaded', () => {
+      langSelect.value = 'en';
+      const lang = 'en';
+      document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+        el.textContent = el.getAttribute('data-' + lang);
+      });
+      document.dir = 'ltr';
+    });
+  </script>
+</body>
+</html>
