@@ -118,7 +118,8 @@
 
   <script>
     // Webhook URL for n8n
-    const WEBHOOK_URL = 'https://n8n.srv960138.hstgr.cloud/webhook-test/1051858a-bae6-4ef3-9aba-d1ba0ebdf1f7';
+    // ملاحظة: أثناء الاختبار في n8n استخدم /webhook-test/، وفي التشغيل الفعلي استخدم /webhook/
+const WEBHOOK_URL = 'https://n8n.srv960138.hstgr.cloud/webhook-test/1051858a-bae6-4ef3-9aba-d1ba0ebdf1f7';
 
     const form = document.getElementById('contactForm');
     const alertBox = document.getElementById('alertBox');
@@ -150,21 +151,48 @@
       submitBtn.textContent = 'Sending...';
 
       try {
+        // مهلة قصوى للإرسال (15 ثانية)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
         const res = await fetch(WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
           mode: 'cors',
-          keepalive: true
+          keepalive: true,
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) {
+          // اقرأ نص الاستجابة إن وجد لتوضيح الخطأ
+          let text = '';
+          try { text = await res.text(); } catch {}
+          throw new Error('HTTP ' + res.status + (text ? (' — ' + text.slice(0, 200)) : ''));
+        }
 
         showAlert('success', 'Form submitted successfully!');
         form.reset();
       } catch (err) {
-        console.error(err);
-        showAlert('error', 'Submission failed. Please check your connection or webhook URL.');
+        console.error('[Webhook Error]', err);
+
+        // محاولة بديلة: إرسال كـ FormData إذا كان الخادم لا يقبل JSON
+        try {
+          const fd = new FormData();
+          fd.append('fullName', document.getElementById('fullName').value.trim());
+          fd.append('phone', document.getElementById('phone').value.trim());
+          fd.append('note', document.getElementById('note').value.trim());
+          fd.append('submittedAt', new Date().toISOString());
+          fd.append('source', 'autoconfirm-web-form');
+
+          await fetch(WEBHOOK_URL, { method: 'POST', body: fd, mode: 'cors', keepalive: true });
+          showAlert('success', 'Form submitted (fallback: FormData).');
+          form.reset();
+        } catch (err2) {
+          console.error('[Fallback Error]', err2);
+          showAlert('error', 'Submission failed. Check webhook URL, HTTPS vs HTTP (no mixed content), and CORS on your proxy.');
+        }
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
